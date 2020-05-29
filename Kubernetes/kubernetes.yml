@@ -1,0 +1,170 @@
+- hosts: ansible
+  tasks:
+    - name: Install htop
+      action: yum name=wget,htop state=installed
+      become: true
+
+    - name: Verificar si docker esta instalado
+      command: systemctl status docker
+      register: docker_check
+      ignore_errors: yes
+
+    - name: Obtener script
+      get_url:
+        url: https://releases.rancher.com/install-docker/18.09.2.sh
+        mode: 0700
+        dest: /home/kansible/
+      when: docker_check.stderr.find('service could not be found') != -1
+      become: true
+
+    - name: Ejecutar script
+      command: /home/kansible/18.09.2.sh
+      when: docker_check.stderr.find('service could not be found') != -1
+      become: yes
+
+    - name: Enable the Docker daemon in systemd
+      become: yes
+      systemd:
+        name: docker
+        enabled: yes
+        masked: no
+        
+    - name:  Agregar grupo docker
+      become: yes
+      group:
+        name: docker 
+
+    - name: Add user kansible to docker group
+      user:
+        name: kansible
+        groups: docker
+        append: yes
+      become: yes
+
+    - name: Start the Docker daemon
+      become: yes
+      systemd:
+        name: docker
+        state: started
+        masked: no
+
+    - name: reset ssh connection to allow user changes to affect 'current login user'
+      meta: reset_connection
+
+    - name: Ejecutar docker 
+      command: docker run -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher:v2.3.5-linux-amd64
+      become: true
+
+    - name: Obtener rke
+      get_url:
+        url: https://github.com/rancher/rke/releases/download/v1.0.5/rke_linux-amd64
+        mode: 0700
+        dest: /home/kansible/
+      become: true
+      
+
+- hosts: k8sn1
+  tasks:
+    - name: Install htop
+      action: yum name=wget,htop state=installed
+      become: true
+
+    - name: Verificar si docker esta instalado
+      command: systemctl status docker
+      register: docker_check
+      ignore_errors: yes
+
+    - name: Obtener script
+      get_url:
+        url: https://releases.rancher.com/install-docker/18.09.2.sh
+        mode: 0700
+        dest: /home/kansible/
+      when: docker_check.stderr.find('service could not be found') != -1
+      become: true
+
+    - name: Ejecutar script
+      command: /home/kansible/18.09.2.sh
+      when: docker_check.stderr.find('service could not be found') != -1
+      become: yes
+
+    - name: Enable the Docker daemon in systemd
+      become: yes
+      systemd:
+        name: docker
+        enabled: yes
+        masked: no
+
+    - name:  Agregar grupo docker
+      become: yes
+      group:
+        name: docker 
+  
+    - name: Add user kansible to docker group
+      user:
+        name: kansible
+        groups: docker
+        append: yes
+      become: yes
+
+    - name: Start the Docker daemon
+      become: yes
+      systemd:
+        name: docker
+        state: started
+        masked: no
+
+    - name: reset ssh connection to allow user changes to affect 'current login user'
+      meta: reset_connection
+
+- hosts: k8s
+  tasks:
+    - name: Install htop
+      action: yum name=wget,htop state=installed
+      become: true
+
+    - name: Verificar si docker esta instalado
+      command: systemctl status docker
+      register: docker_check
+      ignore_errors: yes
+
+    - name: Obtener script
+      get_url:
+        url: https://releases.rancher.com/install-docker/18.09.2.sh
+        mode: 0700
+        dest: /home/kansible/
+      when: docker_check.stderr.find('service could not be found') != -1
+      become: true
+
+    - name: Ejecutar script
+      command: /home/kansible/18.09.2.sh
+      when: docker_check.stderr.find('service could not be found') != -1
+      become: yes
+
+    - name: Enable the Docker daemon in systemd
+      become: yes
+      systemd:
+        name: docker
+        enabled: yes
+        masked: no
+
+    - name:  Agregar grupo docker
+      become: yes
+      group:
+        name: docker 
+  
+    - name: Add user kansible to docker group
+      user:
+        name: kansible
+        groups: docker
+        append: yes
+      become: yes
+
+    - name: Start the Docker daemon
+      become: yes
+      systemd:
+        name: docker
+        state: started
+        masked: no
+
+    - name: reset ssh connection to allow user changes to affect 'current login user'
+      meta: reset_connection

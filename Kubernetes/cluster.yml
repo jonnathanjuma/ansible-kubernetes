@@ -1,0 +1,13 @@
+nodes:
+    - address: 10.128.0.37
+      user: kansible
+      role:
+        - controlplane
+        - etcd
+      hostname_override: k8s
+    - address: 10.128.0.39
+      user: kansible
+      role:
+        - worker
+      hostname_override: k8sn1
+  
